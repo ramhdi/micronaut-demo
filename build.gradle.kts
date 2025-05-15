@@ -24,8 +24,17 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     runtimeOnly("ch.qos.logback:logback-classic")
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
+    kapt("io.micronaut.openapi:micronaut-openapi:4.0.2")
+    implementation("io.swagger.core.v3:swagger-annotations")
+    implementation("io.micronaut.views:micronaut-views-core")
 }
 
+kapt {
+    arguments {
+        arg("micronaut.openapi.project.dir", projectDir.toString())
+        arg("micronaut.openapi.views.spec", "swagger-ui.enabled=true,swagger-ui.theme=flattop")
+    }
+}
 
 application {
     mainClass.set("com.example.ApplicationKt")
