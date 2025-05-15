@@ -1,0 +1,14 @@
+micronaut:
+  application:
+    name: demo
+  server:
+    port: 8000
+netty:
+  default:
+    allocator:
+      max-order: 3
+logger:
+  levels:
+    com.example: DEBUG
+    io.micronaut: INFO
+    io.micronaut.http.client: DEBUG
