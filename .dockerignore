@@ -1,0 +1,13 @@
+.git
+.gradle
+.idea
+build/classes
+build/generated
+build/kotlin
+build/reports
+build/resources
+build/test-results
+build/tmp
+*.iml
+.DS_Store
+*.hprof
