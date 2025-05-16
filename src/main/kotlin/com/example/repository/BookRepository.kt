@@ -3,6 +3,7 @@ package com.example.repository
 import com.example.entity.BookEntity
 import io.micronaut.core.annotation.NonNull
 import io.micronaut.data.annotation.Id
+import io.micronaut.data.annotation.Repository
 import io.micronaut.data.model.Page
 import io.micronaut.data.model.Pageable
 import io.micronaut.data.repository.reactive.ReactorPageableRepository
@@ -12,6 +13,7 @@ import javax.validation.constraints.Positive
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
+@Repository
 interface BookRepository : ReactorPageableRepository<BookEntity, Long> {
 
     fun findByTitleContains(title: String): Flux<BookEntity>
