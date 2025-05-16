@@ -1,85 +1,82 @@
 package com.example.service
 
+import com.example.entity.BookEntity
 import com.example.model.Book
 import com.example.model.BookCreateRequest
 import com.example.model.BookUpdateRequest
+import com.example.repository.BookRepository
 import jakarta.inject.Singleton
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicLong
+import reactor.core.publisher.Mono
 
 @Singleton
-class BookService {
+class BookService(private val bookRepository: BookRepository) {
 
-    private val books = ConcurrentHashMap<Long, Book>()
-    private val counter = AtomicLong(0)
-
-    init {
-        // Add some sample data
-        saveInitial(Book(null, "Dune", "Frank Herbert", 412))
-        saveInitial(Book(null, "Foundation", "Isaac Asimov", 255))
-        saveInitial(Book(null, "1984", "George Orwell", 328))
+    fun findAll(): Mono<List<Book>> {
+        return bookRepository.findAll()
+            .collectList()
+            .map { entities -> entities.map { it.toModel() } }
     }
 
-    fun findAll(): List<Book> = books.values.toList().sortedBy { it.id }
-
-    fun findById(id: Long): Book? = books[id]
-
-    fun existsById(id: Long): Boolean = books.containsKey(id)
-
-    fun existsByTitleAndAuthor(title: String, author: String): Boolean {
-        return books.values.any {
-            it.title.equals(title, ignoreCase = true) &&
-                    it.author.equals(author, ignoreCase = true)
-        }
+    fun findById(id: Long): Mono<Book?> {
+        return bookRepository.findById(id)
+            .map { it.toModel() }
     }
 
-    // Only used for initialization
-    private fun saveInitial(book: Book): Book {
-        val bookId = counter.incrementAndGet()
-        val savedBook = book.copy(id = bookId)
-        books[bookId] = savedBook
-        return savedBook
+    fun existsById(id: Long): Mono<Boolean> {
+        return bookRepository.existsById(id)
     }
 
-    fun create(request: BookCreateRequest): Book {
-        // Check if book with same title and author already exists
-        if (existsByTitleAndAuthor(request.title, request.author)) {
-            throw BookAlreadyExistsException("Book with title '${request.title}' by '${request.author}' already exists")
-        }
+    fun existsByTitleAndAuthor(title: String, author: String): Mono<Boolean> {
+        return bookRepository.existsByTitleAndAuthor(title, author)
+    }
 
-        val bookId = counter.incrementAndGet()
-        val newBook = Book(
-            id = bookId,
-            title = request.title,
-            author = request.author,
-            pages = request.pages
+    fun create(request: BookCreateRequest): Mono<Book> {
+        return existsByTitleAndAuthor(request.title, request.author)
+            .flatMap { exists ->
+                if (exists) {
+                    Mono.error(BookAlreadyExistsException("Book with title '${request.title}' by '${request.author}' already exists"))
+                } else {
+                    bookRepository.save(request.title, request.author, request.pages)
+                        .map { it.toModel() }
+                }
+            }
+    }
+
+    fun update(id: Long, request: BookUpdateRequest): Mono<Book> {
+        return existsById(id)
+            .flatMap { exists ->
+                if (!exists) {
+                    Mono.error(BookNotFoundException("Book with id $id not found"))
+                } else {
+                    bookRepository.update(id, request.title, request.author, request.pages)
+                        .then(bookRepository.findById(id))
+                        .map { it.toModel() }
+                }
+            }
+    }
+
+    fun deleteById(id: Long): Mono<Void> {
+        return existsById(id)
+            .flatMap { exists ->
+                if (!exists) {
+                    Mono.error(BookNotFoundException("Book with id $id not found"))
+                } else {
+                    bookRepository.deleteById(id).then()  // Use then() to convert to Mono<Void>
+                }
+            }
+    }
+
+    // Extension function to convert entity to model
+    private fun BookEntity.toModel(): Book {
+        return Book(
+            id = this.id,
+            title = this.title,
+            author = this.author,
+            pages = this.pages
         )
-        books[bookId] = newBook
-        return newBook
-    }
-
-    fun update(id: Long, request: BookUpdateRequest): Book {
-        if (!books.containsKey(id)) {
-            throw BookNotFoundException("Book with id $id not found")
-        }
-
-        val updatedBook = Book(
-            id = id,
-            title = request.title,
-            author = request.author,
-            pages = request.pages
-        )
-        books[id] = updatedBook
-        return updatedBook
-    }
-
-    fun deleteById(id: Long): Boolean {
-        if (!books.containsKey(id)) {
-            throw BookNotFoundException("Book with id $id not found")
-        }
-        return books.remove(id) != null
     }
 }
 
+// Keep the exceptions from the original service
 class BookNotFoundException(message: String) : RuntimeException(message)
 class BookAlreadyExistsException(message: String) : RuntimeException(message)

@@ -9,7 +9,7 @@ plugins {
 version = "0.1"
 group = "com.example"
 
-val kotlinVersion=project.properties.get("kotlinVersion")
+val kotlinVersion = project.properties.get("kotlinVersion")
 repositories {
     mavenCentral()
 }
@@ -27,6 +27,22 @@ dependencies {
     kapt("io.micronaut.openapi:micronaut-openapi:4.0.2")
     implementation("io.swagger.core.v3:swagger-annotations")
     implementation("io.micronaut.views:micronaut-views-core")
+
+    // Hibernate Reactive for MySQL - compatible with Micronaut 3.7.10
+    implementation("io.micronaut.data:micronaut-data-hibernate-reactive:3.9.4")
+    implementation("io.vertx:vertx-mysql-client:4.3.8")
+
+    // JPA
+    implementation("javax.persistence:javax.persistence-api:2.2")
+
+    // Reactor for reactive programming
+    implementation("io.projectreactor:reactor-core:3.4.30")
+    implementation("io.micronaut.reactor:micronaut-reactor:2.5.6")
+    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:1.1.7")
+
+    // For database migrations
+    implementation("io.micronaut.flyway:micronaut-flyway:5.5.0")
+    runtimeOnly("org.flywaydb:flyway-mysql:8.5.13")
 }
 
 kapt {

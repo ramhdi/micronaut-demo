@@ -39,3 +39,37 @@ logger:
     com.example: DEBUG
     io.micronaut: INFO
     io.micronaut.http.client: DEBUG
+
+# JPA Configuration for Hibernate Reactive
+jpa:
+  default:
+    reactive: true
+    entity-scan:
+      packages:
+        - com.example.entity
+    properties:
+      hibernate:
+        connection:
+          url: jdbc:mysql://root:rootpassword@localhost:3306/booksdb
+          driver_class: com.mysql.cj.jdbc.Driver
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        show_sql: true
+        format_sql: true
+        hbm2ddl.auto: update
+
+# MySQL Connection Properties via Vertx
+vertx:
+  mysql:
+    client:
+      port: 3306
+      host: localhost
+      database: booksdb
+      user: root
+      password: rootpassword
+      maxSize: 5
+
+# Flyway Migration Configuration
+flyway:
+  datasources:
+    default:
+      enabled: true
