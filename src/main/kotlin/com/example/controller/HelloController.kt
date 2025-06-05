@@ -36,9 +36,8 @@ class HelloController {
     @Delete("/{id}")
     @Status(io.micronaut.http.HttpStatus.NO_CONTENT)
     fun delete(id: Long) {
-        // Delete logic would go here
+
     }
 }
 
-// Data class for request body
 data class Message(val text: String)

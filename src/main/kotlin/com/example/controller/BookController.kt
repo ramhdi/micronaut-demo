@@ -3,13 +3,10 @@ package com.example.controller
 import com.example.model.Book
 import com.example.model.BookCreateRequest
 import com.example.model.BookUpdateRequest
-import com.example.service.BookAlreadyExistsException
-import com.example.service.BookNotFoundException
 import com.example.service.BookService
 import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MutableHttpResponse
-import io.micronaut.http.HttpStatus
 import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.*
 import io.micronaut.http.annotation.Error
@@ -71,9 +68,6 @@ class BookController(@Inject private val bookService: BookService) {
                 HttpResponse.created(book)
                     .header("Location", "/books/${book.id}")
             }
-            .onErrorResume(BookAlreadyExistsException::class.java) {
-                Mono.just(HttpResponse.status<Book>(HttpStatus.CONFLICT).body(null))
-            }
     }
 
     @Put("/{id}", produces = [MediaType.APPLICATION_JSON], consumes = [MediaType.APPLICATION_JSON])
@@ -88,9 +82,6 @@ class BookController(@Inject private val bookService: BookService) {
     ): Mono<MutableHttpResponse<Book>> {
         return bookService.update(id, request)
             .map { book -> HttpResponse.ok(book) }
-            .onErrorResume(BookNotFoundException::class.java) {
-                Mono.just(HttpResponse.notFound())
-            }
     }
 
     @Delete("/{id}")
@@ -104,9 +95,6 @@ class BookController(@Inject private val bookService: BookService) {
     ): Mono<MutableHttpResponse<Void>> {
         return bookService.deleteById(id)
             .then(Mono.just(HttpResponse.noContent<Void>()))
-            .onErrorResume(BookNotFoundException::class.java) {
-                Mono.just(HttpResponse.notFound())
-            }
     }
 
     @Error

@@ -36,8 +36,13 @@ class BookService(private val bookRepository: BookRepository) {
                 if (exists) {
                     Mono.error(BookAlreadyExistsException("Book with title '${request.title}' by '${request.author}' already exists"))
                 } else {
-                    bookRepository.save(request.title, request.author, request.pages)
-                        .map { it.toModel() }
+                    val entity = BookEntity(
+                        id = null,
+                        title = request.title,
+                        author = request.author,
+                        pages = request.pages
+                    )
+                    bookRepository.save(entity).map { it.toModel() }
                 }
             }
     }
@@ -61,12 +66,11 @@ class BookService(private val bookRepository: BookRepository) {
                 if (!exists) {
                     Mono.error(BookNotFoundException("Book with id $id not found"))
                 } else {
-                    bookRepository.deleteById(id).then()  // Use then() to convert to Mono<Void>
+                    bookRepository.deleteById(id).then()
                 }
             }
     }
 
-    // Extension function to convert entity to model
     private fun BookEntity.toModel(): Book {
         return Book(
             id = this.id,
@@ -77,6 +81,5 @@ class BookService(private val bookRepository: BookRepository) {
     }
 }
 
-// Keep the exceptions from the original service
 class BookNotFoundException(message: String) : RuntimeException(message)
 class BookAlreadyExistsException(message: String) : RuntimeException(message)
