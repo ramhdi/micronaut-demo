@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.inject.Inject
-import reactor.core.publisher.Mono
 
 @Controller("/books")
 @Tag(name = "Books", description = "Book Management APIs")
@@ -32,9 +31,9 @@ class BookController(@Inject private val bookService: BookService) {
         responseCode = "200", description = "List of books",
         content = [Content(mediaType = MediaType.APPLICATION_JSON, schema = Schema(implementation = Book::class))]
     )
-    fun getAll(): Mono<MutableHttpResponse<List<Book>>> {
-        return bookService.findAll()
-            .map { HttpResponse.ok(it) }
+    suspend fun getAll(): MutableHttpResponse<List<Book>> {
+        val books = bookService.findAll()
+        return HttpResponse.ok(books)
     }
 
     @Get("/{id}", produces = [MediaType.APPLICATION_JSON])
@@ -43,17 +42,15 @@ class BookController(@Inject private val bookService: BookService) {
         ApiResponse(responseCode = "200", description = "Book found"),
         ApiResponse(responseCode = "404", description = "Book not found")
     )
-    fun getById(
+    suspend fun getById(
         @Parameter(description = "Book ID", required = true) id: Long
-    ): Mono<MutableHttpResponse<Book>> {
-        return bookService.findById(id)
-            .map { book ->
-                if (book != null) {
-                    HttpResponse.ok(book)
-                } else {
-                    HttpResponse.notFound()
-                }
-            }
+    ): MutableHttpResponse<Book> {
+        val book = bookService.findById(id)
+        return if (book != null) {
+            HttpResponse.ok(book)
+        } else {
+            HttpResponse.notFound()
+        }
     }
 
     @Post("/", produces = [MediaType.APPLICATION_JSON], consumes = [MediaType.APPLICATION_JSON])
@@ -62,12 +59,10 @@ class BookController(@Inject private val bookService: BookService) {
         ApiResponse(responseCode = "201", description = "Book created successfully"),
         ApiResponse(responseCode = "409", description = "Book already exists")
     )
-    fun create(@Body request: BookCreateRequest): Mono<MutableHttpResponse<Book>> {
-        return bookService.create(request)
-            .map { book ->
-                HttpResponse.created(book)
-                    .header("Location", "/books/${book.id}")
-            }
+    suspend fun create(@Body request: BookCreateRequest): MutableHttpResponse<Book> {
+        val book = bookService.create(request)
+        return HttpResponse.created(book)
+            .header("Location", "/books/${book.id}")
     }
 
     @Put("/{id}", produces = [MediaType.APPLICATION_JSON], consumes = [MediaType.APPLICATION_JSON])
@@ -76,12 +71,12 @@ class BookController(@Inject private val bookService: BookService) {
         ApiResponse(responseCode = "200", description = "Book updated successfully"),
         ApiResponse(responseCode = "404", description = "Book not found")
     )
-    fun update(
+    suspend fun update(
         @Parameter(description = "Book ID", required = true) id: Long,
         @Body request: BookUpdateRequest
-    ): Mono<MutableHttpResponse<Book>> {
-        return bookService.update(id, request)
-            .map { book -> HttpResponse.ok(book) }
+    ): MutableHttpResponse<Book> {
+        val book = bookService.update(id, request)
+        return HttpResponse.ok(book)
     }
 
     @Delete("/{id}")
@@ -90,11 +85,11 @@ class BookController(@Inject private val bookService: BookService) {
         ApiResponse(responseCode = "204", description = "Book deleted successfully"),
         ApiResponse(responseCode = "404", description = "Book not found")
     )
-    fun delete(
+    suspend fun delete(
         @Parameter(description = "Book ID", required = true) id: Long
-    ): Mono<MutableHttpResponse<Void>> {
-        return bookService.deleteById(id)
-            .then(Mono.just(HttpResponse.noContent<Void>()))
+    ): MutableHttpResponse<Void> {
+        bookService.deleteById(id)
+        return HttpResponse.noContent()
     }
 
     @Error

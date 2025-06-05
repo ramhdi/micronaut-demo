@@ -4,28 +4,27 @@ import com.example.entity.BookEntity
 import io.micronaut.core.annotation.NonNull
 import io.micronaut.data.annotation.Id
 import io.micronaut.data.annotation.Repository
-import io.micronaut.data.repository.reactive.ReactorPageableRepository
+import io.micronaut.data.repository.kotlin.CoroutineCrudRepository
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Positive
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
+import kotlinx.coroutines.flow.Flow
 
 @Repository
-interface BookRepository : ReactorPageableRepository<BookEntity, Long> {
-    fun findByTitleContains(title: String): Flux<BookEntity>
+interface BookRepository : CoroutineCrudRepository<BookEntity, Long> {
 
-    fun findByAuthorContains(author: String): Flux<BookEntity>
+    fun findByTitleContains(title: String): Flow<BookEntity>
 
-    fun findByTitleAndAuthor(title: String, author: String): Mono<BookEntity>
+    fun findByAuthorContains(author: String): Flow<BookEntity>
 
-    fun existsByTitleAndAuthor(title: String, author: String): Mono<Boolean>
+    suspend fun findByTitleAndAuthor(title: String, author: String): BookEntity?
 
-    @NonNull
-    fun update(
+    suspend fun existsByTitleAndAuthor(title: String, author: String): Boolean
+
+    suspend fun update(
         @NonNull @NotNull @Id id: Long,
         @NonNull @NotBlank title: String,
         @NonNull @NotBlank author: String,
         @NonNull @Positive pages: Int
-    ): Mono<Long>
+    ): Long
 }

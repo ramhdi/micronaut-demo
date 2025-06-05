@@ -28,15 +28,17 @@ dependencies {
     kapt("io.micronaut.openapi:micronaut-openapi:4.0.2")
     implementation("io.swagger.core.v3:swagger-annotations")
     implementation("io.micronaut.views:micronaut-views-core")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.4")
     implementation("io.micronaut.data:micronaut-data-hibernate-reactive:3.9.4")
     implementation("io.vertx:vertx-mysql-client:4.3.8")
     implementation("javax.persistence:javax.persistence-api:2.2")
-    implementation("io.projectreactor:reactor-core:3.4.30")
-    implementation("io.micronaut.reactor:micronaut-reactor:2.5.6")
-    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:1.1.7")
     implementation("io.micronaut.flyway:micronaut-flyway:5.5.0")
     runtimeOnly("org.flywaydb:flyway-mysql:8.5.13")
     runtimeOnly("mysql:mysql-connector-java:8.0.33")
+
+    // Test dependencies
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
 }
 
 kapt {
@@ -74,6 +76,3 @@ micronaut {
         annotations("com.example.*")
     }
 }
-
-
-
