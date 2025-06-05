@@ -36,6 +36,7 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:1.1.7")
     implementation("io.micronaut.flyway:micronaut-flyway:5.5.0")
     runtimeOnly("org.flywaydb:flyway-mysql:8.5.13")
+    runtimeOnly("mysql:mysql-connector-java:8.0.33")
 }
 
 kapt {

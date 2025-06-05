@@ -30,15 +30,18 @@ micronaut:
             - Authorization
           allowCredentials: true
           maxAge: 3600
+
 netty:
   default:
     allocator:
       max-order: 3
+
 logger:
   levels:
     com.example: DEBUG
     io.micronaut: INFO
     io.micronaut.http.client: DEBUG
+    org.flywaydb: DEBUG
 
 # JPA Configuration for Hibernate Reactive
 jpa:
@@ -55,9 +58,9 @@ jpa:
         dialect: org.hibernate.dialect.MySQL8Dialect
         show_sql: true
         format_sql: true
-        hbm2ddl.auto: update
+        hbm2ddl.auto: validate  # Changed from 'update' to 'validate' to let Flyway handle schema
 
-# MySQL Connection Properties via Vertx
+# MySQL Connection Properties via Vertx (for reactive operations)
 vertx:
   mysql:
     client:
@@ -73,3 +76,10 @@ flyway:
   datasources:
     default:
       enabled: true
+      url: jdbc:mysql://localhost:3306/booksdb
+      user: root
+      password: rootpassword
+      locations: classpath:db/migration
+      baseline-on-migrate: true
+      baseline-version: 0
+      validate-on-migrate: true
