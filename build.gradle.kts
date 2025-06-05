@@ -5,6 +5,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("io.micronaut.application") version "3.7.10"
     id("org.jetbrains.kotlin.plugin.jpa") version "1.6.21"
+    id("org.graalvm.buildtools.native") version "0.9.20"
 }
 
 version = "0.1"
@@ -49,8 +50,9 @@ kapt {
 }
 
 application {
-    mainClass.set("com.example.ApplicationKt")
+    mainClass.set("com.example.Application")
 }
+
 java {
     sourceCompatibility = JavaVersion.toVersion("11")
 }
@@ -67,7 +69,36 @@ tasks {
         }
     }
 }
-graalvmNative.toolchainDetection.set(false)
+
+graalvmNative {
+    binaries {
+        named("main") {
+            imageName.set("books-api")
+            mainClass.set("com.example.Application")
+            debug.set(false)
+            verbose.set(true)
+            fallback.set(false)
+
+            buildArgs.add("--initialize-at-build-time=ch.qos.logback")
+            buildArgs.add("--initialize-at-build-time=org.slf4j.LoggerFactory")
+            buildArgs.add("--initialize-at-build-time=org.slf4j.impl.StaticLoggerBinder")
+            buildArgs.add("--enable-http")
+            buildArgs.add("--enable-https")
+            buildArgs.add("--allow-incomplete-classpath")
+            buildArgs.add("-H:+ReportExceptionStackTraces")
+            buildArgs.add("-H:+AddAllCharsets")
+            buildArgs.add("-H:IncludeResources=.*\\.yml")
+            buildArgs.add("-H:IncludeResources=.*\\.yaml")
+            buildArgs.add("-H:IncludeResources=.*\\.properties")
+            buildArgs.add("-H:IncludeResources=.*\\.xml")
+            buildArgs.add("-H:IncludeResources=.*\\.sql")
+            buildArgs.add("-H:IncludeResources=META-INF/swagger/.*")
+            buildArgs.add("-H:IncludeResources=META-INF/swagger/views/.*")
+        }
+    }
+    toolchainDetection.set(false)
+}
+
 micronaut {
     runtime("netty")
     testRuntime("junit5")

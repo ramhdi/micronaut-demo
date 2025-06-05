@@ -1,0 +1,36 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "META-INF/swagger/.*"
+      },
+      {
+        "pattern": "META-INF/swagger/views/.*"
+      },
+      {
+        "pattern": ".*\\.yml"
+      },
+      {
+        "pattern": ".*\\.yaml"
+      },
+      {
+        "pattern": ".*\\.properties"
+      },
+      {
+        "pattern": ".*\\.xml"
+      },
+      {
+        "pattern": ".*\\.sql"
+      },
+      {
+        "pattern": "db/migration/.*\\.sql"
+      },
+      {
+        "pattern": "logback\\.xml"
+      },
+      {
+        "pattern": "application\\.yml"
+      }
+    ]
+  }
+}

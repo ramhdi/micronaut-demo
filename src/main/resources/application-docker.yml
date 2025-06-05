@@ -1,0 +1,92 @@
+micronaut:
+  application:
+    name: demo
+  server:
+    port: 8000
+    host: 0.0.0.0
+  router:
+    static-resources:
+      swagger:
+        paths: classpath:META-INF/swagger
+        mapping: /swagger/**
+      swagger-ui:
+        paths: classpath:META-INF/swagger/views/swagger-ui
+        mapping: /swagger-ui/**
+    cors:
+      enabled: true
+      configurations:
+        web:
+          allowedOrigins:
+            - "*"
+          allowedMethods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          allowedHeaders:
+            - "*"
+          exposedHeaders:
+            - Content-Type
+            - Authorization
+          allowCredentials: false
+          maxAge: 3600
+
+netty:
+  default:
+    allocator:
+      max-order: 3
+
+logger:
+  levels:
+    com.example: INFO
+    io.micronaut: WARN
+    org.flywaydb: INFO
+    root: INFO
+
+jpa:
+  default:
+    reactive: true
+    entity-scan:
+      packages:
+        - com.example.entity
+    properties:
+      hibernate:
+        connection:
+          url: jdbc:mysql://root:rootpassword@mysql:3306/booksdb
+          driver_class: com.mysql.cj.jdbc.Driver
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        show_sql: false
+        format_sql: false
+        hbm2ddl.auto: validate
+
+vertx:
+  mysql:
+    client:
+      port: 3306
+      host: mysql
+      database: booksdb
+      user: root
+      password: rootpassword
+      maxSize: 5
+      connectTimeout: 30000
+      idleTimeout: 600000
+
+flyway:
+  datasources:
+    default:
+      enabled: true
+      url: jdbc:mysql://mysql:3306/booksdb
+      user: root
+      password: rootpassword
+      locations: classpath:db/migration
+      baseline-on-migrate: true
+      baseline-version: 0
+      validate-on-migrate: true
+
+endpoints:
+  health:
+    enabled: true
+    sensitive: false
+  all:
+    port: 8000

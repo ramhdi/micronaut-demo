@@ -1,15 +1,16 @@
-FROM gradle:7.6.1-jdk11 AS builder
+FROM ghcr.io/graalvm/graalvm-ce:22.3.1 AS static-builder
+RUN gu install native-image
 WORKDIR /app
 COPY build.gradle.kts settings.gradle.kts gradle.properties ./
 COPY gradle ./gradle
-RUN gradle dependencies --no-daemon
-
+COPY gradlew ./
+RUN chmod +x ./gradlew
+RUN ./gradlew dependencies --no-daemon
 COPY src ./src
-RUN gradle build -x test --no-daemon
+RUN ./gradlew nativeCompile --no-daemon \
+    -Pmicronaut.native.args="--static --libc=glibc"
 
-FROM gcr.io/distroless/java11-debian11:nonroot
-WORKDIR /app
-COPY --from=builder /app/build/libs/demo-*-all.jar /app/application.jar
-EXPOSE 8085
-USER nonroot
-ENTRYPOINT ["java", "-jar", "/app/application.jar"]
+FROM gcr.io/distroless/java-base-debian12:nonroot
+COPY --from=static-builder /app/build/native/nativeCompile/books-api /app/books-api
+EXPOSE 8000
+ENTRYPOINT ["/app/books-api"]
